@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="aitoc_smtp_log_listing_data_source" xsi:type="string">Aitoc\Smtp\Model\ResourceModel\Log\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\Mail\TransportInterfaceFactory">
+        <plugin name="Aitoc_Smtp::transportBuider" type="Aitoc\Smtp\Plugin\Framework\Mail\TransportInterfaceFactory" />
+    </type>
+    <type name="Magento\Framework\Mail\Template\TransportBuilderByStore">
+        <plugin name="Aitoc_Smtp::transportBuilderByStore"
+                type="Aitoc\Smtp\Plugin\Framework\Mail\Template\TransportBuilderByStore"/>
+    </type>
+    <type name="Magento\Framework\Mail\Template\TransportBuilder">
+        <plugin name="Aitoc_Smtp::TransportBuilder" type="Aitoc\Smtp\Plugin\Framework\Mail\Template\TransportBuilder"/>
+    </type>
+    <type name="Magento\Framework\Mail\Message">
+        <plugin name="Aitoc_Smtp::PlainPart" type="Aitoc\Smtp\Plugin\Framework\Mail\Message"/>
+    </type>
+</config>

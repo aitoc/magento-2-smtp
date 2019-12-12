@@ -1,0 +1,7 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
+    <router id="admin">
+        <route id="aitoc_smtp" frontName="aitoc_smtp">
+            <module name="Aitoc_Smtp" />
+        </route>
+    </router>
+</config>

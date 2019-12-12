@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Aitoc_Smtp::main" title="SMTP" translate="title" module="Aitoc_Smtp" sortOrder="31" parent="Magento_Reports::report" resource="Aitoc_Smtp::main"/>
+        <add id="Aitoc_Smtp::log" action="aitoc_smtp/log/index" title="Emails Log" translate="title" module="Aitoc_Smtp" sortOrder="10" parent="Aitoc_Smtp::main" resource="Aitoc_Smtp::log"/>
+    </menu>
+</config>
