@@ -165,7 +165,7 @@ Aitoc proposes a full range of Magento development services, supporting e-commer
 
 - **100+** Magento extensions built
 - **800+** development projects completed
-- **3000+** positive reviews on Magento Connect
+- **3000+** positive reviews
 - **20000+** happy clients in over 100 countries, and counting
 
 More FREE Magento 2 Extensions by Aitoc on GitHub
