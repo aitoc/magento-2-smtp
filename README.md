@@ -7,8 +7,6 @@
 
 Daily efforts related to sending numerous emails do not guarantee that all these emails will exactly come to customers. Unfortunately, there is a high probability that some of the messages will be rejected or will marked as spam. The default Magento email settings cannot offer you a perfect solution, endowing your emails with a doubtful reputation, so they can be rated as untrustworthy. 
 
-[Magento 2 SMTP Extension](https://www.aitoc.com/magento-2-smtp.html) comes to help business owners allowing them to install Simple Mail Transfer Protocol - SMTP server that turns email messages into codes or numbers.
-
 This solution ensures merchants that all their messages will be delivered automatically and directly to the target audience. Among the other powerful features, **SMTP Email Settings extension for Magento 2** provides the option to control customization and arrange tests on the server that will guarantee that emails will reach customers timely.
 
 The extension provides friendly configurations with multiple SMTP servers such as **Gmail, Yahoo, Outlook, Mail.com, Hotmail, Office365, O2 Mail, Send In Blue, etc.**
