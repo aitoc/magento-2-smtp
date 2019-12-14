@@ -29,7 +29,6 @@ The extension provides friendly configurations with multiple SMTP servers such a
 - [Aitoc Customer Rewards](https://www.aitoc.com/reward-points)
 - [SMTP User Guide](https://www.aitoc.com/docs/guides/smtp.html)
 - [Get Support](https://www.aitoc.com/get-support.html)
-- [License](https://www.mageplaza.com/LICENSE.txt)
 
 
 ## Installation Guide
