@@ -2,7 +2,8 @@
     "name": "aitoc/smtp",
     "description": "SMTP",
     "require": {
-        "php": "~5.6.5|~7.0"
+        "php": "~5.6.5|~7.0",
+        "aitoc/core": "dev-master"
     },
     "type": "magento2-module",
     "version": "1.0.0",
