@@ -21,7 +21,6 @@ class Delete extends \Aitoc\Smtp\Controller\Adminhtml\Log
                 } else {
                     $this->messageManager->addErrorMessage(__('Unable to find the rule'));
                 }
-
             } catch (\Magento\Framework\Exception\LocalizedException $e) {
                 $this->messageManager->addErrorMessage($e->getMessage());
             } catch (\Exception $e) {

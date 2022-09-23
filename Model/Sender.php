@@ -4,17 +4,16 @@ namespace Aitoc\Smtp\Model;
 
 use Aitoc\Smtp\Api\Data\LogInterface;
 use Aitoc\Smtp\Controller\RegistryConstants;
-use Magento\Store\Model\Store;
+use Aitoc\Smtp\Model\Config\Options\Status;
 use Magento\Framework\App\Area;
 use Magento\Framework\Exception\MailException;
-use Aitoc\Smtp\Model\Config\Options\Status;
+use Magento\Store\Model\Store;
 
-/**
- * Class Sender
- * @package Aitoc\Smtp\Model
- */
 class Sender
 {
+    const ADDRESS_SCOPE_FROM = 'from';
+    const ADDRESS_SCOPE_TO = 'to';
+
     /**
      * @var LogFactory
      */
@@ -30,6 +29,11 @@ class Sender
      */
     private $config;
 
+    /**
+     * @param LogFactory $logFactory
+     * @param \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder
+     * @param Config $config
+     */
     public function __construct(
         \Aitoc\Smtp\Model\LogFactory $logFactory,
         \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
@@ -41,8 +45,12 @@ class Sender
     }
 
     /**
-     * @param $logId
+     * Send the Email using log Id
+     *
+     * @param int $logId
      * @return bool
+     * @throws MailException
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function sendByLogId($logId)
     {
@@ -64,12 +72,12 @@ class Sender
             return false;
         }
 
-        $vars[LogInterface::EMAIL_BODY] = $data[LogInterface::EMAIL_BODY];
+        $vars[LogInterface::EMAIL_BODY] = quoted_printable_decode($data[LogInterface::EMAIL_BODY]);
         $vars[LogInterface::SUBJECT] = $data[LogInterface::SUBJECT];
 
         $this->transportBuilder
-            ->addTo($this->prepareEmailsData($data[LogInterface::RECIPIENT_EMAIL]))
-            ->setFrom($this->prepareEmailsData($data[LogInterface::SENDER_EMAIL], true));
+            ->addTo($this->prepareEmailsData($data[LogInterface::RECIPIENT_EMAIL], self::ADDRESS_SCOPE_TO))
+            ->setFromByScope($this->prepareEmailsData($data[LogInterface::SENDER_EMAIL], self::ADDRESS_SCOPE_FROM));
 
         if ($data[LogInterface::BCC]) {
             $this->transportBuilder->addBcc($this->prepareEmailsData($data[LogInterface::BCC]));
@@ -102,35 +110,45 @@ class Sender
     }
 
     /**
-     * @param $emails
-     * @param bool $from
-     * @return array|\Zend\Mail\AddressList
+     * Prepare the Data for Send Email
+     *
+     * @param array $emails
+     * @param string $scope
+     * @return array|mixed|string|\Zend\Mail\AddressList
      */
-    private function prepareEmailsData($emails, $from = false)
+    private function prepareEmailsData($emails, $scope = '')
     {
         $emailsConverted = [];
         $emails = explode(',', $emails);
         foreach ($emails as $email) {
             $emailData = explode('>', substr($email, 1));
 
-            if ($from) {
-                return [
-                    'name' => ($emailData[0] == 'Unknown' ? null : $emailData[0]),
-                    'email' => $emailData[1],
-                ];
-            } else {
-                $emailsConverted[] = [
-                    'name' => ($emailData[0] == 'Unknown' ? null : $emailData[0]),
-                    'email' => $emailData[1],
-                ];
+            switch ($scope) {
+                case self::ADDRESS_SCOPE_TO:
+                    return $emailData[1];
+                    break;
+
+                case self::ADDRESS_SCOPE_FROM:
+                    return [
+                        'name'  => ($emailData[0] == 'Unknown' ? '' : $emailData[0]),
+                        'email' => $emailData[1],
+                    ];
+                    break;
             }
+            $emailsConverted[] = [
+                'name'  => ($emailData[0] == 'Unknown' ? '' : $emailData[0]),
+                'email' => $emailData[1],
+            ];
         }
 
         return $this->config->getAddressList($emailsConverted);
     }
 
     /**
-     * @return mixed
+     * Get the Current Log Details using Log Id
+     *
+     * @param int $logId
+     * @return Log
      */
     public function getCurrentLog($logId)
     {

@@ -48,7 +48,6 @@ class TransportInterfaceFactory
                 unset($data[RegistryConstants::IS_TEST_FIELD_ARRAY]);
                 $config = $data;
                 $data['message'] = $this->objectManager->create(\Magento\Framework\Mail\Message::class);
-
             } else {
                 $config = $this->config->getFullConfig();
             }

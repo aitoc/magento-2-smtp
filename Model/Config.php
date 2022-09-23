@@ -158,7 +158,7 @@ class Config
     protected function _getExceptionalEmails()
     {
         $allowedEmailsString = $this->config->getModuleConfig(
-            self::XML_PATH_TEMPLATE_DEBUG . 'exeptional_email_addressesa',
+            self::XML_PATH_TEMPLATE_DEBUG . 'exeptional_email_addresses',
             $this->getCurrentStoreId()
         );
 

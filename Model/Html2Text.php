@@ -194,9 +194,10 @@ class Html2Text {
         return $nextName;
     }
 
-    static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false, $options) {
+    static function iterateOverNode($node, $prevName = null, $in_pre = false, $is_office_document = false, $options = [])
+    {
         if ($node instanceof \DOMText) {
-            // Replace whitespace characters with a space (equivilant to \s)
+            // Replace whitespace characters with a space (equivalent to \s)
             if ($in_pre) {
                 $text = "\n" . trim(static::renderText($node->wholeText), "\n\r\t ") . "\n";
                 // Remove trailing whitespace only

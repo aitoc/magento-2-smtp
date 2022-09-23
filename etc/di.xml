@@ -22,4 +22,9 @@
     <type name="Magento\Framework\Mail\Message">
         <plugin name="Aitoc_Smtp::PlainPart" type="Aitoc\Smtp\Plugin\Framework\Mail\Message"/>
     </type>
+    <type name="Magento\Framework\Mail\EmailMessage">
+        <arguments>
+            <argument name="encoding" xsi:type="string">utf-8</argument>
+        </arguments>
+    </type>
 </config>

@@ -159,7 +159,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
             $this->message = $this->aitConfig->prepareMessageToSend($this->getMessage());
 
             if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-                $message = ZendMessage::fromString($this->message->getRawMessage());
+                $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
             } else {
                 $message = $this->message;
             }
@@ -214,7 +214,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
     public function modifyTo()
     {
         if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-            $message = ZendMessage::fromString($this->message->getRawMessage());
+            $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
         } else {
             $message = $this->message;
         }
@@ -268,7 +268,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
                 ->setBodyText(__(self::TEST_MESSAGE_BODY));
 
             if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-                $message = ZendMessage::fromString($this->message->getRawMessage());
+                $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
             } else {
                 $message = $this->message;
             }
