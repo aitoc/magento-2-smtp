@@ -7,12 +7,13 @@ use Aitoc\Smtp\Model\Log;
 class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\AbstractCollection
 {
     /**
-     * @var \Aitoc\ShippingRules\Model\Date
+     * @var \Aitoc\Core\Model\Helpers\Date
      */
     private $date;
 
     public function __construct(
-        \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory, \Psr\Log\LoggerInterface $logger,
+        \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory,
+        \Psr\Log\LoggerInterface $logger,
         \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy,
         \Magento\Framework\Event\ManagerInterface $eventManager,
         \Aitoc\Core\Model\Helpers\Date $date,
@@ -36,7 +37,8 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     protected function _construct()
     {
         parent::_construct();
-        $this->_init(\Aitoc\Smtp\Model\Log::class,
+        $this->_init(
+            \Aitoc\Smtp\Model\Log::class,
             \Aitoc\Smtp\Model\ResourceModel\Log::class
         );
         $this->_setIdFieldName($this->getResource()->getIdFieldName());
@@ -48,7 +50,8 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
      */
     public function addLogIdFilter($logId)
     {
-        $this->addFieldToFilter(Log::LOG_ID_TYPE_FIELD,
+        $this->addFieldToFilter(
+            Log::LOG_ID_TYPE_FIELD,
             [
                 'eq' => $logId
             ]

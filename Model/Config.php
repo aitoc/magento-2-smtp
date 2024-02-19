@@ -2,12 +2,10 @@
 
 namespace Aitoc\Smtp\Model;
 
-use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Store\Model\ScopeInterface;
 use Magento\Email\Model\Template\SenderResolver;
 use Magento\Framework\App\ProductMetadataInterface;
-use Aitoc\Smtp\Controller\RegistryConstants;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Class Config
@@ -120,7 +118,6 @@ class Config
                 $storeId = $this->storeManager->getStore()->getId();
             }
         } catch (LocalizedException $exception) {
-        } catch (NoSuchEntityException $e) {
         }
 
         return $storeId;
@@ -136,7 +133,7 @@ class Config
             $this->getCurrentStoreId()
         );
 
-        return $this->getDataFromString($allowedEmailsString);;
+        return $this->getDataFromString($allowedEmailsString);
     }
 
     /**
@@ -162,9 +159,8 @@ class Config
             $this->getCurrentStoreId()
         );
 
-        $arrayFromString = explode(',', $allowedEmailsString);
+        $arrayFromString = explode(',', (string)$allowedEmailsString);
         array_walk($arrayFromString, [$this, 'trimAllowedValues']);
-
 
         return $arrayFromString;
     }
@@ -179,7 +175,7 @@ class Config
             $this->getCurrentStoreId()
         );
 
-        $arrayFromString = explode(',', $allowedDomainsString);
+        $arrayFromString = explode(',', (string)$allowedDomainsString);
         array_walk($arrayFromString, [$this, 'trimAllowedValues']);
 
         return $arrayFromString;
@@ -229,8 +225,7 @@ class Config
             $domains = $this->_getExceptionalDomains();
             $emails = $this->_getExceptionalEmails();
 
-            if (($emails && in_array($email, $emails)) || (is_array($domains) && $this->validDomain($email, $domains)))
-            {
+            if (($emails && in_array($email, $emails)) || (is_array($domains) && $this->validDomain($email, $domains))) {
                 return false;
             }
 
@@ -355,19 +350,20 @@ class Config
 
     /**
      * @param $emailData
-     * @return \Zend\Mail\Address
+     * @return \Laminas\Mail\Address
      */
-    public function getNewAddress($emailData){
-        return new \Zend\Mail\Address($emailData['email'], $emailData['name']);
+    public function getNewAddress($emailData)
+    {
+        return new \Laminas\Mail\Address($emailData['email'], $emailData['name']);
     }
-
 
     /**
      * @param $emailsData
-     * @return \Zend\Mail\AddressList
+     * @return \Laminas\Mail\AddressList
      */
-    public function getAddressList($emailsData) {
-        $addressList = new \Zend\Mail\AddressList();
+    public function getAddressList($emailsData)
+    {
+        $addressList = new \Laminas\Mail\AddressList();
 
         foreach ($emailsData as $data) {
             $addressList->add($data['email'], isset($data['name']) ? $data['name'] : null);

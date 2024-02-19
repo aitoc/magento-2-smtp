@@ -112,9 +112,9 @@ class Sender
     /**
      * Prepare the Data for Send Email
      *
-     * @param array $emails
+     * @param string $emails
      * @param string $scope
-     * @return array|mixed|string|\Zend\Mail\AddressList
+     * @return array|mixed|string|\Laminas\Mail\AddressList
      */
     private function prepareEmailsData($emails, $scope = '')
     {

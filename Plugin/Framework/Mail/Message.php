@@ -30,10 +30,10 @@ class Message
 
         try {
             $body = $subject->getBody();
-            if ($body instanceof \Zend\Mime\Message && !$body->isMultiPart()) {
+            if ($body instanceof \Laminas\Mime\Message && !$body->isMultiPart()) {
                 $reflection = new \ReflectionProperty(MailMessage::class, 'zendMessage');
                 $reflection->setAccessible(true);
-                /** @var \Zend\Mail\Message $zendMessage */
+                /** @var \Laminas\Mail\Message $zendMessage */
                 $zendMessage = $reflection->getValue($subject);
 
                 $plainContent = '';
@@ -42,9 +42,9 @@ class Message
                 } catch (\Exception $e) {
                 }
 
-                $textPart = new \Zend\Mime\Part($plainContent);
+                $textPart = new \Laminas\Mime\Part($plainContent);
                 $textPart->setCharset($zendMessage->getEncoding());
-                $textPart->setType(\Zend\Mime\Mime::TYPE_TEXT);
+                $textPart->setType(\Laminas\Mime\Mime::TYPE_TEXT);
                 $body->setParts(array_merge([$textPart], $body->getParts()));
                 $zendMessage->setBody($body);
                 $zendMessage->getHeaders()->get('content-type')->setType('multipart/alternative');

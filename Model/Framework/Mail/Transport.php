@@ -2,21 +2,16 @@
 
 namespace Aitoc\Smtp\Model\Framework\Mail;
 
-use Magento\Framework\Exception\MailException;
-use Magento\Framework\Phrase;
-use Zend\Mail\Message as ZendMessage;
-use Zend\Mail\Address;
-use Zend\Mail\Transport\Smtp;
-use Magento\Framework\Mail\MessageInterface;
-use Magento\Email\Model\Template\SenderResolver;
-use Aitoc\Smtp\Model\Config;
-use Zend\Mail\Transport\SmtpOptions;
-use Aitoc\Smtp\Model\Resolver\From;
-use Aitoc\Smtp\Model\LogFactory;
-use Aitoc\Smtp\Model\Config\Options\Status;
-use Magento\Framework\Registry;
 use Aitoc\Smtp\Controller\RegistryConstants;
-use Zend_Mail_Transport_Smtp;
+use Aitoc\Smtp\Model\Config;
+use Aitoc\Smtp\Model\Config\Options\Status;
+use Aitoc\Smtp\Model\LogFactory;
+use Aitoc\Smtp\Model\Resolver\From;
+use Magento\Email\Model\Template\SenderResolver;
+use Magento\Framework\Exception\MailException;
+use Magento\Framework\Mail\MessageInterface;
+use Magento\Framework\Phrase;
+use Magento\Framework\Registry;
 
 class Transport implements \Magento\Framework\Mail\TransportInterface
 {
@@ -26,9 +21,9 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
         "Now, your store uses an Aitoc SMTP. Please, hit ‘Save Config’ to use this connection.";
 
     /**
-     * @var Sendmail
+     * @var \Laminas\Mail\Transport\Smtp
      */
-    private $zendTransport;
+    private $smtp;
 
     /**
      * @var MessageInterface
@@ -80,13 +75,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
         $this->fromResolver = $from;
         $this->logFactory = $logFactory;
         $this->registry = $registry;
-
-        if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-            $this->zendTransport = new Smtp($this->prepareOptions($config));
-        } else {
-            $this->zendTransport = new Zend_Mail_Transport_Smtp($config['host'], $config);
-        }
-
+        $this->smtp = new \Laminas\Mail\Transport\Smtp($this->prepareOptions($config));
         $this->message = $message;
         $this->setFrom();
     }
@@ -97,13 +86,13 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
     public function setFrom()
     {
         $fromData = $this->fromResolver->getFrom();
-        $message = ZendMessage::fromString($this->message->getRawMessage());
+        $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage());
 
         if ($fromData) {
-            if (($message instanceof ZendMessage && !$message->getFrom()->count())
-                || ((is_array($message->getHeaders()) && !array_key_exists("From", $message->getHeaders())))
+            if (($message instanceof \Laminas\Mail\Message && !$message->getFrom()->count())
+                || (!array_key_exists("From", $message->getHeaders()->toArray()))
             ) {
-                $this->message->setFrom($this->aitConfig->getNewAddress($fromData));
+                $this->message->setFromAddress($this->aitConfig->getNewAddress($fromData));
             }
         }
 
@@ -112,7 +101,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
 
     /**
      * @param $config
-     * @return SmtpOptions
+     * @return \Laminas\Mail\Transport\SmtpOptions
      */
     private function prepareOptions($config)
     {
@@ -120,14 +109,11 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
             $config['name'] = self::DEFAULT_LOCAL_CLIENT_HOSTNAME;
         }
 
-        $options = new SmtpOptions([
-            'name' => isset($config['name']) ? $config['name'] : '',
-            'host' => isset($config['host']) ? $config['host'] : '',
-            'port' => isset($config['port']) ? $config['port'] : 465,
-        ]);
-
+        $options = new \Laminas\Mail\Transport\SmtpOptions();
+        $options->setName($config['name'] ?? '');
+        $options->setHost($config['host'] ?? '');
+        $options->setPort($config['port'] ?? 465);
         $connectionConfig = [];
-
 
         if (isset($config['auth']) && $config['auth'] != '') {
             $options->setConnectionClass($config['auth']);
@@ -159,7 +145,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
             $this->message = $this->aitConfig->prepareMessageToSend($this->getMessage());
 
             if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-                $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
+                $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage())->setEncoding('utf-8');
             } else {
                 $message = $this->message;
             }
@@ -182,7 +168,9 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
                 $message = $modifiedRecipient;
             }
 
-            $this->zendTransport->send($message);
+            if ($message) {
+                $this->smtp->send($message);
+            }
 
             if (!$logDisabled) {
                 $this->getLoger()->log($message);
@@ -209,12 +197,12 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
     }
 
     /**
-     * @return bool|ZendMessage
+     * @return bool|\Laminas\Mail\Message
      */
     public function modifyTo()
     {
         if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-            $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
+            $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage())->setEncoding('utf-8');
         } else {
             $message = $this->message;
         }
@@ -226,7 +214,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
         if ($toEmails) {
             foreach ($toEmails as $email) {
                 $name = '';
-                if ($email instanceof Address) {
+                if ($email instanceof \Laminas\Mail\Address\AddressInterface) {
                     $name = $email->getName();
                     $email = $email->getEmail();
                 }
@@ -268,12 +256,12 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
                 ->setBodyText(__(self::TEST_MESSAGE_BODY));
 
             if ($this->aitConfig->isNewSender(RegistryConstants::VERSION_COMPARISON_OLD_MAIL)) {
-                $message = ZendMessage::fromString($this->message->getRawMessage())->setEncoding('utf-8');
+                $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage())->setEncoding('utf-8');
             } else {
                 $message = $this->message;
             }
 
-            $this->zendTransport->send($message);
+            $this->smtp->send($message);
 
             return $result;
         } catch (\Exception $e) {

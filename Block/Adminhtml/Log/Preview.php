@@ -61,12 +61,10 @@ class Preview extends \Magento\Backend\Block\Widget
         }
 
         if ($logModel->getId()) {
-            return  '<iframe onload="resizeIframe(this)" srcdoc="'. $string . '" style="width: 100%; height: 100%"></iframe>';
+            return  '<iframe onload="resizeIframe(this)" srcdoc="' . $string . '" style="width: 100%; height: 100%"></iframe>';
         } else {
             throw new \Exception('Log with ID not found. Pleas try again');
         }
-
-        return $logModel;
     }
 
     /**
@@ -80,7 +78,7 @@ class Preview extends \Magento\Backend\Block\Widget
     /**
      * Get either default or any store view
      *
-     * @return \Magento\Store\Model\Store|null
+     * @return \Magento\Store\Api\Data\StoreInterface|null
      */
     protected function getAnyStoreView()
     {

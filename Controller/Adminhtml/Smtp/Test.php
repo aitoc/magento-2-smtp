@@ -2,7 +2,7 @@
 
 namespace Aitoc\Smtp\Controller\Adminhtml\Smtp;
 
-use Exception;
+use Aitoc\Smtp\Controller\RegistryConstants;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Email\Model\Template\SenderResolver;
@@ -10,7 +10,6 @@ use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
-use Aitoc\Smtp\Controller\RegistryConstants;
 
 class Test extends Action
 {
@@ -26,10 +25,6 @@ class Test extends Action
      * @var LoggerInterface
      */
     private $logger;
-    /**
-     * @var TransportBuilder
-     */
-    private $_transportBuilder;
 
     /**
      * @var SenderResolver
@@ -57,12 +52,12 @@ class Test extends Action
     private $transportInterfaceFactory;
 
     public function __construct(
-        Context $context,
-        LoggerInterface $logger,
-        SenderResolver $senderResolver,
-        \Magento\Framework\Json\EncoderInterface $jsonEncoder,
-        \Magento\Config\Model\Config\Factory $configFactory,
-        \Aitoc\Smtp\Model\Config $config,
+        Context                                           $context,
+        LoggerInterface                                   $logger,
+        SenderResolver                                    $senderResolver,
+        \Magento\Framework\Json\EncoderInterface          $jsonEncoder,
+        \Magento\Config\Model\Config\Factory              $configFactory,
+        \Aitoc\Smtp\Model\Config                          $config,
         \Magento\Framework\Mail\TransportInterfaceFactory $transportInterfaceFactory
     ) {
         $this->logger = $logger;
@@ -84,14 +79,17 @@ class Test extends Action
         $data = $this->getRequest()->getParams();
 
         try {
-            if ($data && isset($data[self::TEST_EMAIL_TO_FIELD_NAME])) {
+            if (!$this->config->enabled()) {
+                $result = [
+                    'status' => false,
+                    'content' => __('Please enable the module.')
+                ];
+            } elseif ($data && isset($data[self::TEST_EMAIL_TO_FIELD_NAME])) {
                 $config = $this->config->convertFromPostToSmtpParams($this->removeUnusedFields($data));
                 $config[RegistryConstants::IS_TEST_FIELD_ARRAY] = true;
                 unset($config[self::TEST_EMAIL_TO_FIELD_NAME]);
 
                 $transport = $this->transportInterfaceFactory->create($config);
-
-
                 $transport->testSend($data[self::TEST_EMAIL_TO_FIELD_NAME]);
 
                 $result = [
