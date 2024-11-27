@@ -1,3 +1,7 @@
+## 1.0.7 - 2024-11-06
+### Changed
+- Added compatibility for Magento 2.4.7-p2 and PHP 8.3
+
 ## 1.0.6 - 2024-02-14
 ### Fixed
 - Better error handling of sending scenarios.
