@@ -13,7 +13,7 @@ use Magento\Framework\Mail\MessageInterface;
 use Magento\Framework\Phrase;
 use Magento\Framework\Registry;
 
-class Transport implements \Magento\Framework\Mail\TransportInterface
+class TransportLaminas implements \Magento\Framework\Mail\TransportInterface
 {
     const DEFAULT_LOCAL_CLIENT_HOSTNAME = 'localhost';
     const TEST_MESSAGE_SUBJECT = 'Aitoc SMTP Test';
@@ -148,7 +148,12 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
                 $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage())->setEncoding('utf-8');
             } else {
                 $message = $this->message;
+                if (!($message instanceof \Laminas\Mail\Message) && method_exists($this->message, 'getRawMessage')) {
+                    $message = \Laminas\Mail\Message::fromString($this->message->getRawMessage())->setEncoding('utf-8');
+                }
             }
+
+            $message = $this->ensureBasicHeadersLaminas($message);
 
             if ($this->aitConfig->isBlockedDelivery()) {
                 $modifiedRecipient = $this->modifyTo();
@@ -165,7 +170,7 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
                     }
                 }
 
-                $message = $modifiedRecipient;
+                $message = $this->ensureBasicHeadersLaminas($modifiedRecipient);
             }
 
             if ($message) {
@@ -187,6 +192,55 @@ class Transport implements \Magento\Framework\Mail\TransportInterface
             throw new MailException(new Phrase($e->getMessage()), $e);
         }
     }
+
+    /**
+     * Ensure basic headers (From/To/Subject) for Laminas message
+     *
+     * @param \Laminas\Mail\Message $message
+     * @return \Laminas\Mail\Message
+     */
+    private function ensureBasicHeadersLaminas(\Laminas\Mail\Message $message)
+    {
+        if (!$message->getFrom() || !$message->getFrom()->count()) {
+            $fromData = $this->fromResolver->getFrom();
+            if ($fromData) {
+                $message->addFrom($fromData['email'], $fromData['name'] ?? null);
+            } else {
+                $senderData = $this->aitConfig->getSenderData();
+                if ($senderData) {
+                    $message->addFrom($senderData['email'], $senderData['name'] ?? null);
+                }
+            }
+        }
+
+        if (!$message->getTo() || !$message->getTo()->count()) {
+            if (method_exists($this->message, 'getTo')) {
+                $to = $this->message->getTo();
+                if (is_array($to)) {
+                    foreach ($to as $toAddress) {
+                        if (is_object($toAddress) && method_exists($toAddress, 'getEmail')) {
+                            $message->addTo($toAddress->getEmail(), method_exists($toAddress, 'getName') ? $toAddress->getName() : null);
+                        } elseif (is_array($toAddress)) {
+                            $message->addTo($toAddress['email'] ?? ($toAddress[0] ?? ''), $toAddress['name'] ?? null);
+                        } elseif (is_string($toAddress)) {
+                            $message->addTo($toAddress);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!$message->getSubject() && method_exists($this->message, 'getSubject')) {
+            $subject = (string) $this->message->getSubject();
+            if ($subject) {
+                $message->setSubject($subject);
+            }
+        }
+
+        return $message;
+    }
+
+
 
     /**
      * @return \Aitoc\Smtp\Model\Log

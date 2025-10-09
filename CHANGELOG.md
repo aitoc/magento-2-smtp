@@ -1,3 +1,7 @@
+### 1.0.8 - 2025-08-26
+### Changed
+- Added compatibility for Magento 2.4.8 and PHP 8.4 (SMTP-22)
+
 ## 1.0.7 - 2024-11-06
 ### Changed
 - Added compatibility for Magento 2.4.7-p2 and PHP 8.3

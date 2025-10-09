@@ -6,6 +6,7 @@ use Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\Mail\TransportInterfaceFactory as TransportInterfaceFactoryCore;
 use Aitoc\Smtp\Model\Config;
 use Aitoc\Smtp\Controller\RegistryConstants;
+use Magento\Framework\App\ProductMetadataInterface;
 
 /**
  * TransportInterface Plugin
@@ -23,14 +24,24 @@ class TransportInterfaceFactory
      * @var \Aitoc\Smtp\Model\Config
      */
     private $config;
+    /**
+     * @var ProductMetadataInterface
+     */
+    private $productMetadata;
 
-
+    /**
+     * @param ObjectManagerInterface $objectManager
+     * @param Config $config
+     * @param ProductMetadataInterface $productMetadata
+     */
     public function __construct(
         ObjectManagerInterface $objectManager,
-        Config $config
+        Config $config,
+        ProductMetadataInterface $productMetadata
     ) {
         $this->objectManager = $objectManager;
         $this->config = $config;
+        $this->productMetadata = $productMetadata;
     }
 
     /**
@@ -54,11 +65,20 @@ class TransportInterfaceFactory
 
             $data = array_merge($data, ['config' => $config]);
 
-            return $this->objectManager
-                ->create(
-                    \Aitoc\Smtp\Model\Framework\Mail\Transport::class,
+            // Detect Magento version
+            $version = $this->productMetadata->getVersion();
+            if (version_compare($version, '2.4.8', '>=')) {
+                // Use Symfony for Magento 2.4.8+
+                return $this->objectManager->create(
+                    \Aitoc\Smtp\Model\Framework\Mail\TransportSymfony::class,
                     $data
                 );
+            }
+            // Default Laminas for < 2.4.8
+            return $this->objectManager->create(
+                \Aitoc\Smtp\Model\Framework\Mail\TransportLaminas::class,
+                $data
+            );
         }
 
         return $proceed($data);

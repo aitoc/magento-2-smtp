@@ -350,25 +350,39 @@ class Config
 
     /**
      * @param $emailData
-     * @return \Laminas\Mail\Address
+     * @return \Laminas\Mail\Address|\Symfony\Component\Mime\Address
      */
     public function getNewAddress($emailData)
     {
+        // Check if we're using Symfony Mailer (Magento 2.4.8+)
+        if (class_exists('\Symfony\Component\Mime\Address')) {
+            return new \Symfony\Component\Mime\Address($emailData['email'], $emailData['name']);
+        }
+        
+        // Fallback to Laminas for older versions
         return new \Laminas\Mail\Address($emailData['email'], $emailData['name']);
     }
 
     /**
      * @param $emailsData
-     * @return \Laminas\Mail\AddressList
+     * @return \Laminas\Mail\AddressList|array
      */
     public function getAddressList($emailsData)
     {
+        // Check if we're using Symfony Mailer (Magento 2.4.8+)
+        if (class_exists('\Symfony\Component\Mime\Address')) {
+            $addressList = [];
+            foreach ($emailsData as $data) {
+                $addressList[] = new \Symfony\Component\Mime\Address($data['email'], isset($data['name']) ? $data['name'] : null);
+            }
+            return $addressList;
+        }
+        
+        // Fallback to Laminas for older versions
         $addressList = new \Laminas\Mail\AddressList();
-
         foreach ($emailsData as $data) {
             $addressList->add($data['email'], isset($data['name']) ? $data['name'] : null);
         }
-
         return $addressList;
     }
 
